@@ -4,97 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Earth Model</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-        }
-        #canvas-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-        }
-        #webgl-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        .overlay {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            z-index: 10; /* Ensures it appears above the canvas */
-        }
-    </style>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="orrery-web -app\root\css\3dearth.css"> <!-- Link to the CSS file -->
+
 </head>
 <body>
+    <!-- Navigation Bar -->
+    
+
     <div id="canvas-container">
         <canvas id="webgl-canvas"></canvas>
         <div class="overlay">
             <h1>Orbit Tracker</h1>
-            <p>This is your overlay content on the Earth model.</p>
-            <input type="text" placeholder="Search...">
-            <button type="button">Search</button>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">
+                    <span class="animated-text">Orbit Tracker</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span> <!-- Hamburger Icon -->
+                </button>
+        
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Planets</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">NEO</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">NEA</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">PHA's</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">FAQs</a>
+                        </li>
+                    </ul>
+                    <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-2" type="search" placeholder="Search..." aria-label="Search">
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                    </form>
+                </div>
+            </nav>
+            <div class="overlay">
+                <div class="zoom-buttons">
+                    <button id="zoom-in" class="btn btn-primary">+</button>
+                    <button id="zoom-out" class="btn btn-primary">-</button>
+                </div>
+            </div>
+            
+            
         </div>
     </div>
+    
 
+    <!-- Three.js and other scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/controls/OrbitControls.js"></script>
-    <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-canvas') });
-
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        const loader = new THREE.GLTFLoader();
-        const modelUrl = 'orrery-web -app/root/assets/earth_globe.glb'; // Update with your GLB file path
-
-        let earthModel; // Variable to hold the model
-
-        loader.load(modelUrl, (gltf) => {
-            earthModel = gltf.scene; // Store the model
-            scene.add(earthModel);
-            earthModel.position.set(0, 0, 0); // Position the model as needed
-        });
-
-        camera.position.z = 2; // Adjust the camera position as needed
-
-        // Add OrbitControls for interactivity
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-        controls.dampingFactor = 0.25; // smoothness of the movement
-
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
-
-            // Rotate the Earth model automatically when not interacting
-            if (!controls.enabled) {
-                if (earthModel) {
-                    earthModel.rotation.y += 0.01; // Adjust rotation speed as needed
-                }
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        // Enable auto-rotation
-        controls.autoRotate = true; // Set to true for auto-rotation
-        controls.autoRotateSpeed = 2.0; // Adjust the speed of auto-rotation
-
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+    <script src="orrery-web -app\root\js\3dearth.js"></script> <!-- Link to the JavaScript file -->
+    
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
