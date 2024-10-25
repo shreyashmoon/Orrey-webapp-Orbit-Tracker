@@ -1,0 +1,102 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #121212; /* Dark background for better visibility */
+    color: #ffffff;
+}
+
+.navbar {
+    transition: background-color 0.3s ease;
+}
+
+.navbar:hover {
+    background-color: #1a1a1a; /* Slightly lighter on hover */
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.1); /* Scale effect on hover */
+}
+
+/* Navbar Heading */
+.navbar-heading {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffc107; /* Bootstrap's yellow color */
+    animation: text-animation 1.5s ease forwards;
+    margin-left: 15px; /* Space between the brand and heading */
+}
+
+/* Canvas Container */
+#3d-canvas-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 56px); /* Full height minus navbar height */
+}
+
+#3d-canvas {
+    width: 100%; /* Responsive width */
+    height: auto; /* Maintain aspect ratio */
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .navbar {
+        font-size: 0.9rem; /* Smaller font size for mobile */
+    }
+    
+    #3d-canvas {
+        height: 80vh; /* Limit height on smaller screens */
+    }
+}
+
+/* Keyframes for Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Keyframes for Navbar Heading Animation */
+@keyframes text-animation {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    50% {
+        opacity: 0.5;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animation Class */
+.animate-fade-in {
+    animation: fadeIn 1s ease-in-out forwards;
+}
+
+/* Button Styles */
+.nav-link {
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #ffd700; /* Gold color on hover */
+}
+
+.navbar-nav .nav-item.active .nav-link {
+    font-weight: bold; /* Highlight active link */
+    color: #ffd700; /* Gold color for active link */
+}
