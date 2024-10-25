@@ -12,10 +12,20 @@ const modelUrl = 'orrery-web -app/root/assets/earth_globe.glb'; // Update with y
 let earthModel; // Variable to hold the model
 
 loader.load(modelUrl, (gltf) => {
-    earthModel = gltf.scene; // Store the model
+    earthModel = gltf.scene;
+
+    // Center the model's geometry on the origin (0,0,0)
+    earthModel.position.set(0, 0, 0);
+
+    // Add any necessary offset adjustments to ensure exact centering
+    const box = new THREE.Box3().setFromObject(earthModel);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    earthModel.position.sub(center); // Center the model exactly
+
     scene.add(earthModel);
-    earthModel.position.set(0, 10, 0); // Position the model as needed
 });
+
 
 camera.position.z = 15; // Adjust the camera position as needed
 
@@ -31,7 +41,7 @@ function animate() {
     // Rotate the Earth model automatically when not interacting
     if (!controls.enabled) {
         if (earthModel) {
-            earthModel.rotation.y += 0.1; // Adjust rotation speed as needed
+            earthModel.rotation.y += 2.0; // Adjust rotation speed as needed
         }
     }
 
@@ -44,87 +54,76 @@ controls.autoRotateSpeed = 2.0; // Adjust the speed of auto-rotation
 
 animate();
 
+
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
-// Select the zoom buttons
-// Select the zoom buttons
-const zoomInButton = document.getElementById("zoom-in");
-const zoomOutButton = document.getElementById("zoom-out");
+// // Select the zoom buttons
+// // Select the zoom buttons
+// const zoomInButton = document.getElementById("zoom-in");
+// const zoomOutButton = document.getElementById("zoom-out");
 
 // Zoom settings
 const zoomSpeed = 3.0; // Speed of zoom animation
 // Assuming 'controls' is already initialized as your OrbitControls instance
 controls.zoomSpeed = 3.5; // Adjust this value for sensitivity (default is 1.0)
 
-const minFov = 20; // Minimum FOV for zoom in
-const maxFov = 75; // Maximum FOV for zoom out
-let targetFov = camera.fov; // Initial target FOV
+// const minFov = 10; // Minimum FOV for zoom in
+// const maxFov = 75; // Maximum FOV for zoom out
+// let targetFov = camera.fov; // Initial target FOV
 
-// Smooth zoom function
-function animateZoom() {
-    if (Math.abs(camera.fov - targetFov) > 0.1) { // If FOV is not close enough to target
-        camera.fov += (targetFov - camera.fov) * zoomSpeed; // Gradually move FOV towards target
-        camera.updateProjectionMatrix(); // Update camera projection
-        requestAnimationFrame(animateZoom); // Continue animating
-    }
+// // Smooth zoom function
+// function animateZoom() {
+//     if (Math.abs(camera.fov - targetFov) > 0.1) { // If FOV is not close enough to target
+//         camera.fov += (targetFov - camera.fov) * zoomSpeed; // Gradually move FOV towards target
+//         camera.updateProjectionMatrix(); // Update camera projection
+//         requestAnimationFrame(animateZoom); // Continue animating
+//     }
+// }
+
+// // Event listeners for zoom buttons
+// zoomInButton.addEventListener("click", () => {
+//     if (camera.fov > minFov) {
+//         targetFov -= 5; // Decrease FOV for zoom-in
+//         animateZoom();
+//     }
+// });
+
+// zoomOutButton.addEventListener("click", () => {
+//     if (camera.fov < maxFov) {
+//         targetFov += 5; // Increase FOV for zoom-out
+//         animateZoom();
+//     }
+// });
+
+const apiKey = '0XZeXdg4mOmfnwVLdR0NFkVXOQAg9mLzl5uFX8hj'; // Replace with your API key
+const neoUrl = `https://api.nasa.gov/neo/rest/v1/neo/browse?api_key=${apiKey}`;
+
+// Function to create a dot for each NEO
+function createNeoDot(neo) {
+    const radius = 3; // Size of the dot
+    const geometry = new THREE.SphereGeometry(radius, 8, 8);
+    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color for NEO
+    const dot = new THREE.Mesh(geometry, material);
+
+    // Example: Normalize and set position based on NEO data
+    // Assume neo.orbitData is available and represents the distance
+    const distanceFromEarth = neo.close_approach_data[0].miss_distance.kilometers / 10000; // Example conversion
+    dot.position.set(distanceFromEarth, Math.random() * 2 - 1, Math.random() * 2 - 1); // Random y,z for visualization
+
+    scene.add(dot); // Add dot to the scene
 }
 
-// Event listeners for zoom buttons
-zoomInButton.addEventListener("click", () => {
-    if (camera.fov > minFov) {
-        targetFov -= 5; // Decrease FOV for zoom-in
-        animateZoom();
-    }
-});
+// Fetch NEO data and create dots
+fetch(neoUrl)
+    .then(response => response.json())
+    .then(data => {
+        const neos = data.near_earth_objects; // Access NEOs
+        neos.forEach(neo => {
+            createNeoDot(neo); // Create a dot for each NEO
+        });
+    })
+    .catch(error => console.error('Error fetching NEO data:', error));
 
-zoomOutButton.addEventListener("click", () => {
-    if (camera.fov < maxFov) {
-        targetFov += 5; // Increase FOV for zoom-out
-        animateZoom();
-    }
-});
-
-//reset the position after inactivity
-let inactivityTimeout;
-const inactivityDelay = 6000; // Delay of 6 seconds
-const initialRotation = { x: 0, y: 0, z: 0 }; // Adjust this if the Earth has a different initial position
-const resetSpeed = 0.55; // Adjust for reset speed
-
-// Reset Earth to the initial position with a smooth transition
-function resetEarthPosition() {
-    const deltaX = initialRotation.x - earth.rotation.x;
-    const deltaY = initialRotation.y - earth.rotation.y;
-    const deltaZ = initialRotation.z - earth.rotation.z;
-
-    // Smoothly move the Earth to the initial position using interpolation
-    earth.rotation.x += deltaX * resetSpeed;
-    earth.rotation.y += deltaY * resetSpeed;
-    earth.rotation.z += deltaZ * resetSpeed;
-
-    // Continue animation if not at the exact initial position
-    if (Math.abs(deltaX) > 0.01 || Math.abs(deltaY) > 0.01 || Math.abs(deltaZ) > 0.01) {
-        requestAnimationFrame(resetEarthPosition);
-    }
-}
-
-// Reset the inactivity timer and start countdown
-function resetInactivityTimer() {
-    clearTimeout(inactivityTimeout);
-
-    // Start the timer for inactivity
-    inactivityTimeout = setTimeout(() => {
-        requestAnimationFrame(resetEarthPosition);
-    }, inactivityDelay);
-}
-
-// Detect user interaction to reset inactivity timer
-window.addEventListener("mousemove", resetInactivityTimer);
-window.addEventListener("touchmove", resetInactivityTimer);
-window.addEventListener("mousedown", resetInactivityTimer);
-window.addEventListener("touchstart", resetInactivityTimer);
-
-// Initialize timer on load
-resetInactivityTimer();
