@@ -1,7 +1,4 @@
 
-/* styles.css */
-
-/* Body Styles */
 body {
     margin: 0;
     overflow: hidden;
@@ -10,42 +7,45 @@ h1{
     color: #F4D06F;
 }
 
-/* Canvas Container */
+
 #canvas-container {
     position: relative;
     width: 100vw;
     height: 100vh;
-    background-image: url('stars.jpeg'); /* Update with your background image path */
-    background-size: cover; /* Makes sure the image covers the whole area */
-    background-position: center; /* Centers the image */
+    background-image: url('stars.jpeg');
+    background-size: cover; 
+    background-position: center; 
 }
 
-/* WebGL Canvas */
+
 #webgl-canvas {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1; /* Ensures the canvas is above the background */
+    z-index: 1; 
 }
 
-/* Overlay Styles */
+
 .overlay {
-    position:relative;
-    top: 10px;
+    position: absolute;
+    top: 20px;
     left: 20px;
+    justify-content: center;
+    flex: 10px;
     color: white;
-    z-index: 10; /* Ensures it appears above the canvas */
+    z-index: 10; 
 }
 
-/* Text Animation */
+
 .animated-text {
     display: inline-block;
-    animation: typing 2s steps(10, end), blink-caret 0.75s step-end infinite;
+    animation: typing 3s steps(10, end), blink-caret 0.75s step-end infinite;
     white-space: nowrap;
-    overflow: hidden; /* Ensures no overflow */
-    border-right: 1px solid white; /* Creates a caret effect */
+    overflow: hidden;
+    border-right: 6px solid rgb(83, 228, 0);
+    color: #F4D06F;
 }
 
 @keyframes typing {
@@ -65,15 +65,3 @@ h1{
         border-color: white;
     }
 }
-.zoom-buttons {
-    position:relative;
-    bottom: -630px; /* Distance from the bottom */
-    right: -1310px;  /* Distance from the right */
-    z-index: 20;  /* Ensure it's above other content */
-}
-
-.zoom-buttons .btn {
-    margin: 0 5px; /* Space between buttons */
-}
-
-/* new header
