@@ -61,43 +61,25 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
-// // Select the zoom buttons
-// // Select the zoom buttons
-// const zoomInButton = document.getElementById("zoom-in");
-// const zoomOutButton = document.getElementById("zoom-out");
-
 // Zoom settings
 const zoomSpeed = 3.0; // Speed of zoom animation
 // Assuming 'controls' is already initialized as your OrbitControls instance
 controls.zoomSpeed = 3.5; // Adjust this value for sensitivity (default is 1.0)
 
-// const minFov = 10; // Minimum FOV for zoom in
-// const maxFov = 75; // Maximum FOV for zoom out
-// let targetFov = camera.fov; // Initial target FOV
+const minFov = 10; // Minimum FOV for zoom in
+const maxFov = 75; // Maximum FOV for zoom out
+let targetFov = camera.fov; // Initial target FOV
 
-// // Smooth zoom function
-// function animateZoom() {
-//     if (Math.abs(camera.fov - targetFov) > 0.1) { // If FOV is not close enough to target
-//         camera.fov += (targetFov - camera.fov) * zoomSpeed; // Gradually move FOV towards target
-//         camera.updateProjectionMatrix(); // Update camera projection
-//         requestAnimationFrame(animateZoom); // Continue animating
-//     }
-// }
+// Smooth zoom function
+function animateZoom() {
+    if (Math.abs(camera.fov - targetFov) > 0.1) { // If FOV is not close enough to target
+        camera.fov += (targetFov - camera.fov) * zoomSpeed; // Gradually move FOV towards target
+        camera.updateProjectionMatrix(); // Update camera projection
+        requestAnimationFrame(animateZoom); // Continue animating
+    }
+}
 
-// // Event listeners for zoom buttons
-// zoomInButton.addEventListener("click", () => {
-//     if (camera.fov > minFov) {
-//         targetFov -= 5; // Decrease FOV for zoom-in
-//         animateZoom();
-//     }
-// });
 
-// zoomOutButton.addEventListener("click", () => {
-//     if (camera.fov < maxFov) {
-//         targetFov += 5; // Increase FOV for zoom-out
-//         animateZoom();
-//     }
-// });
 
 const apiKey = '0XZeXdg4mOmfnwVLdR0NFkVXOQAg9mLzl5uFX8hj'; // Replace with your API key
 const neoUrl = `https://api.nasa.gov/neo/rest/v1/neo/browse?api_key=${apiKey}`;
@@ -144,4 +126,53 @@ fetch(neoUrl)
 
 
     //sdfsdcsds
-    
+    const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+// Add an event listener to detect mouse clicks
+window.addEventListener('click', onMouseClick, false);
+
+function onMouseClick(event) {
+    // Update mouse position for raycasting
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // Set the raycaster with the camera and mouse position
+    raycaster.setFromCamera(mouse, camera);
+
+    // Calculate objects intersecting the raycaster
+    const intersects = raycaster.intersectObjects(scene.children);
+
+    if (intersects.length > 0) {
+        const clickedObject = intersects[0].object;
+        
+        if (clickedObject.userData) { // Check if the object has userData
+            displayObjectInfo(clickedObject.userData); // Pass the NEO data
+        }
+    }
+}
+
+function displayObjectInfo(neo) {
+    // Display information in the info box
+    document.getElementById('object-name').textContent = `Name: ${neo.name || 'N/A'}`;
+    document.getElementById('object-distance').textContent = `Distance: ${neo.close_approach_data[0].miss_distance.kilometers} km`;
+    document.getElementById('object-speed').textContent = `Speed: ${neo.close_approach_data[0].relative_velocity.kilometers_per_hour} km/h`;
+
+    // Show the info box
+    document.getElementById('info-box').style.display = 'block';
+}
+
+function onMouseClick(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children);
+
+    if (intersects.length > 0 && intersects[0].object.userData) {
+        displayObjectInfo(intersects[0].object.userData);
+    } else {
+        document.getElementById('info-box').style.display = 'none'; // Hide info box if not clicking on an object
+    }
+}
+
+
