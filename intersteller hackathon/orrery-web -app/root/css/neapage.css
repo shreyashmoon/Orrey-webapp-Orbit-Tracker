@@ -32,8 +32,8 @@ h1{
 
 /* Overlay Styles */
 .overlay {
-    position: absolute;
-    top: 20px;
+    position:relative;
+    top: 10px;
     left: 20px;
     color: white;
     z-index: 10; /* Ensures it appears above the canvas */
@@ -42,11 +42,10 @@ h1{
 /* Text Animation */
 .animated-text {
     display: inline-block;
-    animation: typing 3s steps(10, end), blink-caret 0.75s step-end infinite;
+    animation: typing 2s steps(10, end), blink-caret 0.75s step-end infinite;
     white-space: nowrap;
     overflow: hidden; /* Ensures no overflow */
-    border-right: 6px solid rgb(83, 228, 0); /* Creates a caret effect */
-    color: #F4D06F;
+    border-right: 1px solid white; /* Creates a caret effect */
 }
 
 @keyframes typing {
@@ -77,3 +76,4 @@ h1{
     margin: 0 5px; /* Space between buttons */
 }
 
+/* new header

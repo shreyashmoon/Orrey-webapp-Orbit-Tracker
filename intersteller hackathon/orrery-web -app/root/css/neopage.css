@@ -35,6 +35,8 @@ h1{
     position: absolute;
     top: 20px;
     left: 20px;
+    justify-content: center;
+    flex: 10px;
     color: white;
     z-index: 10; /* Ensures it appears above the canvas */
 }

@@ -1,68 +1,147 @@
-// NEO Filter and Display Script
-async function fetchNEOData() {
-    const apiKey = '0XZeXdg4mOmfnwVLdR0NFkVXOQAg9mLzl5uFX8hj';
-    const url = `https://api.nasa.gov/neo/rest/v1/feed?start_date=2024-01-01&end_date=2024-01-07&api_key=${apiKey}`;
-    
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        return Object.values(data.near_earth_objects).flat(); // Flatten array of dates
-    } catch (error) {
-        console.error('Error fetching NEO data:', error);
-        return [];
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.9, 5000); // Example values
+
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-canvas') });
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const loader = new THREE.GLTFLoader();
+const modelUrl = 'orrery-web -app/root/assets/earth_globe.glb'; // Update with your GLB file path
+
+let earthModel; // Variable to hold the model
+
+loader.load(modelUrl, (gltf) => {
+    earthModel = gltf.scene;
+
+    // Center the model's geometry on the origin (0,0,0)
+    earthModel.position.set(0, 0, 0);
+
+    // Add any necessary offset adjustments to ensure exact centering
+    const box = new THREE.Box3().setFromObject(earthModel);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    earthModel.position.sub(center); // Center the model exactly
+
+    scene.add(earthModel);
+});
+
+
+camera.position.z = 15; // Adjust the camera position as needed
+
+// Add OrbitControls for interactivity
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+controls.dampingFactor = 0.50; // smoothness of the movement
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+
+    // Rotate the Earth model automatically when not interacting
+    if (!controls.enabled) {
+        if (earthModel) {
+            earthModel.rotation.y += 2.0; // Adjust rotation speed as needed
+        }
     }
+
+    renderer.render(scene, camera);
 }
 
-// Filter NEAs function
-async function filterNEAs() {
-    const allNEOs = await fetchNEOData();
+// Enable auto-rotation
+controls.autoRotate = true; // Set to true for auto-rotation
+controls.autoRotateSpeed = 2.0; // Adjust the speed of auto-rotation
 
-    // Adjusted filter criteria; update if orbit class is not found in returned structure
-    const neas = allNEOs.filter(neo => {
-        const orbitClass = neo.orbit_class?.description || '';
-        return orbitClass.includes("Apollo") || orbitClass.includes("Amor") || orbitClass.includes("Aten");
-    });
+animate();
 
-    console.log('Filtered NEAs:', neas); // Logging NEAs to verify filtering
-    return neas;
-}
 
-// Dot creation function with color input
-function createNeoDot(neo, color = 0xfffffff) {
-    const geometry = new THREE.SphereGeometry(0.2, 8, 8);
-    const material = new THREE.MeshBasicMaterial({ color });
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+// // Select the zoom buttons
+// // Select the zoom buttons
+// const zoomInButton = document.getElementById("zoom-in");
+// const zoomOutButton = document.getElementById("zoom-out");
+
+// Zoom settings
+const zoomSpeed = 3.0; // Speed of zoom animation
+// Assuming 'controls' is already initialized as your OrbitControls instance
+controls.zoomSpeed = 3.5; // Adjust this value for sensitivity (default is 1.0)
+
+// const minFov = 10; // Minimum FOV for zoom in
+// const maxFov = 75; // Maximum FOV for zoom out
+// let targetFov = camera.fov; // Initial target FOV
+
+// // Smooth zoom function
+// function animateZoom() {
+//     if (Math.abs(camera.fov - targetFov) > 0.1) { // If FOV is not close enough to target
+//         camera.fov += (targetFov - camera.fov) * zoomSpeed; // Gradually move FOV towards target
+//         camera.updateProjectionMatrix(); // Update camera projection
+//         requestAnimationFrame(animateZoom); // Continue animating
+//     }
+// }
+
+// // Event listeners for zoom buttons
+// zoomInButton.addEventListener("click", () => {
+//     if (camera.fov > minFov) {
+//         targetFov -= 5; // Decrease FOV for zoom-in
+//         animateZoom();
+//     }
+// });
+
+// zoomOutButton.addEventListener("click", () => {
+//     if (camera.fov < maxFov) {
+//         targetFov += 5; // Increase FOV for zoom-out
+//         animateZoom();
+//     }
+// });
+
+const apiKey = '0XZeXdg4mOmfnwVLdR0NFkVXOQAg9mLzl5uFX8hj'; // Replace with your API key
+const neoUrl = `https://api.nasa.gov/neo/rest/v1/neo/browse?api_key=${apiKey}`;
+
+// Function to create a dot for each NEO
+function createNeoDot(neo) {
+    const radius = 2.5; // Size of the dot
+    const geometry = new THREE.SphereGeometry(radius, 8, 8);
+    const material = new THREE.MeshBasicMaterial({ color: 0xfffffff }); // Red color for NEO
     const dot = new THREE.Mesh(geometry, material);
 
-    // Example positioning
-    const distanceFromEarth = neo.close_approach_data[0].miss_distance.kilometers / 100000; 
-    const phi = Math.random() * Math.PI;
-    const theta = Math.random() * 2 * Math.PI;
+    // Example: Normalize and set position based on NEO data
+    // Assume neo.orbitData is available and represents the distance
+    const distanceFromEarth = neo.close_approach_data[0].miss_distance.kilometers / 100000; // Example conversion
+    dot.position.set(distanceFromEarth, Math.random() * 2 - 1, Math.random() * 2 - 1); // Random y,z for visualization
+
+    // Scatter NEOs in a spherical area around the Earth
+    const phi = Math.random() * Math.PI; // Random angle for spherical coordinates
+    const theta = Math.random() * 2 * Math.PI; // Random angle for spherical coordinates
+
+    // Convert spherical coordinates to Cartesian coordinates
     const x = distanceFromEarth * Math.sin(phi) * Math.cos(theta);
     const y = distanceFromEarth * Math.sin(phi) * Math.sin(theta);
     const z = distanceFromEarth * Math.cos(phi);
 
+    // Set position of the dot
     dot.position.set(x, y, z);
-    dot.userData = neo;
-    scene.add(dot);
+    dot.userData = neo; // Store NEO data for later use
+
+    scene.add(dot); // Add dot to the scene
 }
 
-// Fetch and display NEAs with a specific color
-async function displayNEAs() {
-    const neas = await filterNEAs();
-    neas.forEach(nea => {
-        createNeoDot(nea, 0xff0000); // Red color for NEAs
-    });
-}
+// Fetch NEO data and create dots
+fetch(neoUrl)
+    .then(response => response.json())
+    .then(data => {
+        const neos = data.near_earth_objects; // Access NEOs
+        neos.forEach(neo => {
+            createNeoDot(neo); // Create a dot for each NEO
+        });
+    })
+    .catch(error => console.error('Error fetching NEO data:', error));
 
-// Main function to run the NEO filter and display
-(async function runNEODisplay() {
-    await displayNEAs();
-})();
 
-// Renderer and Animation Setup
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-}
-animate();
+
+    //sdfsdcsds
+    
